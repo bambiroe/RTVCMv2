@@ -4,6 +4,7 @@ import { loadRawU8 } from "./volume/loadRaw";
 import { createMipRenderer } from "./gpu/pipeline";
 import { createCamera } from "./camera/camera";
 import { attachOrbitControls } from "./camera/controls";
+import { createCytosolSimulator } from "./cytosol/cytosol";
 
 const SIZE = 256;
 
@@ -29,9 +30,18 @@ async function main() {
   const camera = createCamera(canvas.clientWidth / canvas.clientHeight);
   attachOrbitControls(canvas, camera);
 
-  const renderer = createMipRenderer(device, context, format, volume);
+  const cytosol = createCytosolSimulator(device, SIZE);
+
+  const renderer = createMipRenderer(
+    device,
+    context,
+    format,
+    volume,              // RAW
+    cytosol.texture(),   // Cytosol
+  );
 
   function frame() {
+    cytosol.step();
     renderer.render(camera);
     requestAnimationFrame(frame);
   }

@@ -4,8 +4,9 @@ struct Camera {
 };
 
 @group(0) @binding(0) var samp : sampler;
-@group(0) @binding(1) var vol : texture_3d<f32>;
-@group(0) @binding(2) var<uniform> cam : Camera;
+@group(0) @binding(1) var rawVol : texture_3d<f32>;
+@group(0) @binding(2) var cytoVol : texture_3d<f32>;
+@group(0) @binding(3) var<uniform> cam : Camera;
 
 struct VSOut {
   @builtin(position) pos : vec4<f32>,
@@ -53,7 +54,11 @@ fn fs(in : VSOut) -> @location(0) vec4<f32> {
   for (var i=0.0; i<steps; i=i+1.0) {
     let p = rayO + rayD*t;
     let uvw = p + vec3(0.5);
-    m = max(m, textureSample(vol,samp,uvw).r);
+    let raw  = textureSample(rawVol, samp, uvw).r;
+    let cyto = textureSample(cytoVol, samp, uvw).r;
+    let combined = max(raw, cyto * 0.6);
+
+    m = max(m, combined);
 
     t += dt;
   }

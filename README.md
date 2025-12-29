@@ -1,3 +1,17 @@
+> **Work in Progress**
+>
+> RTVCMv2 is actively under development.
+> Core volumetric rendering and GPU-based cytosol simulation are implemented,
+> while visual blending, parameter controls, and biological modeling are still evolving.
+>
+> **Status:**
+>- ✔ WebGPU volume rendering (MIP)
+>- ✔ GPU-based cytosol simulation (compute shader)
+>- 🚧 Visual blending & transfer functions
+>- 🚧 Parameter UI
+
+---
+
 # RTVCMv2
 
 **RTVCMv2** is a real-time WebGPU application for volumetric rendering

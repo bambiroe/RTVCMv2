@@ -54,7 +54,8 @@ export function createMipRenderer(
   device: GPUDevice,
   context: GPUCanvasContext,
   format: GPUTextureFormat,
-  volumeTex: GPUTexture,
+  rawVolume: GPUTexture,
+  cytosolVolume: GPUTexture,
 ): MipRenderer {
   const sampler = device.createSampler({
     magFilter: "linear",
@@ -69,13 +70,10 @@ export function createMipRenderer(
   const bindGroupLayout = device.createBindGroupLayout({
     entries: [
       { binding: 0, visibility: GPUShaderStage.FRAGMENT, sampler: {} },
-      {
-        binding: 1,
-        visibility: GPUShaderStage.FRAGMENT,
-        texture: { viewDimension: "3d" },
-      },
-      { binding: 2, visibility: GPUShaderStage.FRAGMENT, buffer: { type: "uniform" } },
-    ],
+      { binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: { viewDimension: "3d" } }, // RAW
+      { binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: { viewDimension: "3d" } }, // Cytosol
+      { binding: 3, visibility: GPUShaderStage.FRAGMENT, buffer: { type: "uniform" } },
+    ],    
   });
 
   const pipeline = device.createRenderPipeline({
@@ -101,11 +99,12 @@ export function createMipRenderer(
     layout: bindGroupLayout,
     entries: [
       { binding: 0, resource: sampler },
-      { binding: 1, resource: volumeTex.createView({ dimension: "3d" }) },
-      { binding: 2, resource: { buffer: uniformBuffer } },
+      { binding: 1, resource: rawVolume.createView({ dimension: "3d" }) },
+      { binding: 2, resource: cytosolVolume.createView({ dimension: "3d" }) },
+      { binding: 3, resource: { buffer: uniformBuffer } },
     ],
   });
-
+    
   function resize() {
     const canvas = (context as unknown as { canvas: HTMLCanvasElement }).canvas;
     const dpr = Math.max(1, window.devicePixelRatio || 1);
